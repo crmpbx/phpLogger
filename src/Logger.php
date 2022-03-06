@@ -7,25 +7,20 @@ use crmpbx\commutator\Commutator;
 
 class Logger
 {
-    public Commutator $commutator;
+    private Commutator $commutator;
 
     public string $service;
-    public string $route;
+    private string $route;
 
     private string $companySid;
     private string $eventSid;
 
     private array $data;
 
-    public function __construct($service = '', $route = '', $config = [])
+    public function init(Commutator $commutator, string $route, string $companySid, string $eventSid): void
     {
-        $this->commutator = new Commutator($config);
-        $this->service = $service;
+        $this->commutator = $commutator;
         $this->route = self::parseRoute($route);
-    }
-
-    public function init(string $companySid, string $eventSid): void
-    {
         $this->companySid = $companySid;
         $this->eventSid = $eventSid;
     }
