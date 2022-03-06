@@ -1,0 +1,23 @@
+{
+  "name": "crmpbx/logger",
+  "description": "Logger for pbx infrastructure",
+  "type": "library",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Mikita Darashko",
+      "email": "nd@crmpbx.app"
+    }
+  ],
+  "require": {
+    "php": ">=8.1",
+    "crmpbx/commutator": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~9.5.16"
+  },
+  "minimum-stability": "dev",
+  "autoload": {
+    "classmap": ["src"]
+  }
+}
