@@ -9,6 +9,8 @@ class Logger
 {
     private Commutator $commutator;
 
+    private bool $isInit = false;
+
     public string $service;
     private string $route;
 
@@ -23,6 +25,7 @@ class Logger
         $this->route = self::parseRoute($route);
         $this->companySid = $companySid;
         $this->eventSid = $eventSid;
+        $this->isInit = true;
     }
 
     private static function parseRoute(string $target): string
@@ -35,6 +38,9 @@ class Logger
 
     public function add(string $checkpoint, array $data, array $timer = []): void
     {
+        if(!$this->isInit)
+            return;
+
         $log = ['data' => $data];
         if (count($timer))
             $log['timer'] = $timer;
@@ -44,6 +50,9 @@ class Logger
 
     public function send(): void
     {
+        if(!$this->isInit)
+            return;
+
         $this->commutator->send('log', 'POST', '/api/log', [
             'CompanySid' => $this->companySid ?? 'base',
             'EventSid' => $this->eventSid ?? 'EV' . md5(time() . rand(0, 999)),
