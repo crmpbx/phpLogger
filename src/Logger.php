@@ -28,6 +28,11 @@ class Logger
         $this->isInit = true;
     }
 
+    public function setEventSid($sid)
+    {
+        $this->eventSid = $sid;
+    }
+
     private static function parseRoute(string $target): string
     {
         if(str_ends_with($target, '/'))
