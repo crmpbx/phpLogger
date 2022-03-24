@@ -59,6 +59,7 @@ class Logger
         if($data instanceof \Throwable)
             $data = $this->mapException($data);
 
+        $data = ['data' => $data];
         if (count($timer))
             $data['timer'] = $timer;
 
