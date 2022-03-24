@@ -7,7 +7,7 @@ use crmpbx\commutator\Commutator;
 
 class Logger
 {
-    private \Closure $callback;
+    public \Closure $callback;
 
     public string $service;
     private string $route;
@@ -17,8 +17,9 @@ class Logger
 
     private array $data;
 
-    public function __construct(\Closure $callback = null)
+    public function __construct(string $service = null, \Closure $callback = null)
     {
+        $this->service = $service;
         $this->callback = $callback;
         $this->eventSid = 'EV'.md5(time().rand(0,999));
         $this->companySid = 'CO'.str_repeat('0', 32);
@@ -75,7 +76,7 @@ class Logger
         if ($data instanceof \Throwable)
             $data = self::mapException($data);
 
-        $logData[$this->route][$event][] = $data;
+        $logData[$this->service][$this->route][$event][] = $data;
 
         file_put_contents($dir.'/'.$this->eventSid.'.txt', json_encode($logData));
     }
