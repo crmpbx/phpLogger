@@ -35,7 +35,7 @@ class Logger
 
     private static function parseRoute(string $target): string
     {
-        if(str_ends_with($target, '/'))
+        if (str_ends_with($target, '/'))
             $target = substr($target, 0, strlen($target)-1);
 
         return str_replace('/', '_', $target);
@@ -43,7 +43,7 @@ class Logger
 
     public function add(string $checkpoint, array $data, array $timer = []): void
     {
-        if(!$this->isInit)
+        if (!$this->isInit)
             return;
 
         $log = ['data' => $data];
@@ -53,9 +53,44 @@ class Logger
         $this->data[$this->service][$this->route][$checkpoint][] = $log;
     }
 
+    public function addInFile(string $event, array|\Throwable $data):void
+    {
+        $dir = '../runtime/logs/'.$this->companySid;
+        if (!is_dir($dir))
+            mkdir($dir);
+
+        $logData = file_exists($dir.'/'.$this->eventSid.'.txt')
+            ? json_decode(file_get_contents($dir.'/'.$this->eventSid.'.txt'))
+            : [];
+
+        if ($data instanceof \Throwable)
+            $data = self::mapException($data);
+
+        $logData[$this->route][$event][] = $data;
+
+        file_put_contents($dir.'/'.$this->eventSid.'.txt', json_encode($logData));
+    }
+
+    private function mapException(\Throwable $e)
+    {
+        if ($e->getPrevious() instanceof \Throwable)
+            $this->mapException($e->getPrevious());
+
+        return [
+            "code" => $e->getCode(),
+            "file" => $e->getFile(),
+            "line" => $e->getLine(),
+            "name" => 'Exception',
+            "time" => time(),
+            "type" => $e::class,
+            "message" => $e->getMessage(),
+            "stack-trace" => preg_split('/#\d*\s/', $e->getTraceAsString(), -1, PREG_SPLIT_NO_EMPTY),
+        ];
+    }
+
     public function send(): void
     {
-        if(!$this->isInit)
+        if (!$this->isInit)
             return;
 
         $this->commutator->send('log', 'POST', '/api/log', [
@@ -65,22 +100,8 @@ class Logger
         ]);
     }
 
-    public function addError(\Throwable $exception): void
+    public function addError(\Throwable $e): void
     {
-        if ($exception->getPrevious() instanceof \Throwable)
-            $this->addError($exception->getPrevious());
-
-        $data = [
-            "code" => $exception->getCode(),
-            "file" => $exception->getFile(),
-            "line" => $exception->getLine(),
-            "name" => 'Exception',
-            "time" => time(),
-            "type" => $exception::class,
-            "message" => $exception->getMessage(),
-            "stack-trace" => preg_split('/#\d*\s/', $exception->getTraceAsString(), -1, PREG_SPLIT_NO_EMPTY),
-        ];
-
-        $this->add('exception', $data);
+        $this->add('exception', $this->mapException($e));
     }
 }
