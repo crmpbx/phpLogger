@@ -15,7 +15,8 @@ class Logger
     private string $companySid;
     private string $eventSid;
 
-    private array $data;
+    private array $data = [];
+    private array $fileData = [];
 
     public function __construct(string $service = null, \Closure $callback = null)
     {
@@ -66,7 +67,15 @@ class Logger
         $this->data[$this->service][$this->route][$checkpoint][] = $data;
     }
 
-    public function addInFile(string $event, array|\Throwable $data):void
+    public function addInFile(string $event, array|\Throwable $data): void
+    {
+        if ($data instanceof \Throwable)
+            $data = self::mapException($data);
+
+        $this->fileData[$event] = $data;
+    }
+
+    private function writeInFileSystem(): void
     {
         $dir = '../runtime/logs/'.$this->companySid;
         if (!is_dir($dir))
@@ -76,10 +85,7 @@ class Logger
             ? json_decode(file_get_contents($dir.'/'.$this->eventSid.'.txt'), true)
             : [];
 
-        if ($data instanceof \Throwable)
-            $data = self::mapException($data);
-
-        $logData[$this->service][$this->route][$event][] = $data;
+        $logData[$this->service][$this->route][] = $this->fileData;
 
         file_put_contents($dir.'/'.$this->eventSid.'.txt', json_encode($logData));
     }
