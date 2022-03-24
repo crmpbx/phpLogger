@@ -73,7 +73,7 @@ class Logger
             mkdir($dir);
 
         $logData = file_exists($dir.'/'.$this->eventSid.'.txt')
-            ? json_decode(file_get_contents($dir.'/'.$this->eventSid.'.txt'))
+            ? json_decode(file_get_contents($dir.'/'.$this->eventSid.'.txt'), true)
             : [];
 
         if ($data instanceof \Throwable)
