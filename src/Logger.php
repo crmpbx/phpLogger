@@ -41,10 +41,13 @@ class Logger
         return str_replace('/', '_', $target);
     }
 
-    public function add(string $checkpoint, array $data, array $timer = []): void
+    public function add(string $checkpoint, array|\Throwable $data, array $timer = []): void
     {
         if (!$this->isInit)
             return;
+
+        if($data instanceof \Throwable)
+            $data = $this->mapException($data);
 
         $log = ['data' => $data];
         if (count($timer))
@@ -98,10 +101,5 @@ class Logger
             'EventSid' => $this->eventSid ?? 'EV' . md5(time() . rand(0, 999)),
             'Data' => $this->data
         ]);
-    }
-
-    public function addError(\Throwable $e): void
-    {
-        $this->add('exception', $this->mapException($e));
     }
 }
