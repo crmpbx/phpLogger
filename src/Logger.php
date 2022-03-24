@@ -19,8 +19,11 @@ class Logger
 
     public function __construct(string $service = null, \Closure $callback = null)
     {
-        $this->service = $service;
-        $this->callback = $callback;
+        if ($service)
+            $this->service = $service;
+        if ($callback)
+            $this->callback = $callback;
+
         $this->eventSid = 'EV'.md5(time().rand(0,999));
         $this->companySid = 'CO'.str_repeat('0', 32);
         $this->route = self::parseRoute($_SERVER['REQUEST_URI']);
