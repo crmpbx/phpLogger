@@ -39,7 +39,11 @@ class Logger
 
     private function getCommutator(): Commutator
     {
-        return call_user_func($this->callback);
+        $commutator = call_user_func($this->callback);
+        if($commutator instanceof Commutator)
+            return $commutator;
+
+        //TODO Throw Exception
     }
 
     public function setEventSid($sid)
@@ -75,7 +79,7 @@ class Logger
         $this->fileData[$event] = $data;
     }
 
-    private function writeInFileSystem(): void
+    public function writeInFileSystem(): void
     {
         $dir = '../runtime/logs/'.$this->companySid;
         if (!is_dir($dir))
