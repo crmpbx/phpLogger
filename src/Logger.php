@@ -7,9 +7,7 @@ use crmpbx\commutator\Commutator;
 
 class Logger
 {
-    private Commutator $commutator;
-
-    private bool $isInit = false;
+    private \Closure $callback;
 
     public string $service;
     private string $route;
@@ -19,13 +17,24 @@ class Logger
 
     private array $data;
 
-    public function init(Commutator $commutator, string $route, string $companySid, string $eventSid): void
+    public function __construct(\Closure $callback = null)
     {
-        $this->commutator = $commutator;
+        $this->callback = $callback;
+        $this->eventSid = 'EV'.md5(time().rand(0,999));
+        $this->companySid = 'CO'.str_repeat('0', 32);
+        $this->route = self::parseRoute($_SERVER['REQUEST_URI']);
+    }
+
+    public function init(string $route, string $companySid, string $eventSid): void
+    {
         $this->route = self::parseRoute($route);
         $this->companySid = $companySid;
         $this->eventSid = $eventSid;
-        $this->isInit = true;
+    }
+
+    private function getCommutator(): Commutator
+    {
+        return call_user_func($this->callback);
     }
 
     public function setEventSid($sid)
@@ -43,9 +52,6 @@ class Logger
 
     public function add(string $checkpoint, array|\Throwable $data, array $timer = []): void
     {
-        if (!$this->isInit)
-            return;
-
         if($data instanceof \Throwable)
             $data = $this->mapException($data);
 
@@ -93,10 +99,7 @@ class Logger
 
     public function send(): void
     {
-        if (!$this->isInit)
-            return;
-
-        $this->commutator->send('log', 'POST', '/api/log', [
+        $this->getCommutator()->send('log', 'POST', '/api/log', [
             'CompanySid' => $this->companySid ?? 'base',
             'EventSid' => $this->eventSid ?? 'EV' . md5(time() . rand(0, 999)),
             'Data' => $this->data
