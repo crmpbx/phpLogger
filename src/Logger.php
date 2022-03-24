@@ -59,11 +59,10 @@ class Logger
         if($data instanceof \Throwable)
             $data = $this->mapException($data);
 
-        $log = ['data' => $data];
         if (count($timer))
-            $log['timer'] = $timer;
+            $data['timer'] = $timer;
 
-        $this->data[$this->service][$this->route][$checkpoint][] = $log;
+        $this->data[$this->service][$this->route][$checkpoint][] = $data;
     }
 
     public function addInFile(string $event, array|\Throwable $data):void
@@ -84,7 +83,7 @@ class Logger
         file_put_contents($dir.'/'.$this->eventSid.'.txt', json_encode($logData));
     }
 
-    private function mapException(\Throwable $e)
+    private function mapException(\Throwable $e): array
     {
         if ($e->getPrevious() instanceof \Throwable)
             $this->mapException($e->getPrevious());
