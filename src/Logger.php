@@ -71,16 +71,22 @@ class Logger
         $this->data[$this->service][$this->route][$checkpoint][] = $data;
     }
 
-    public function addInFile(string $event, array|\Throwable $data): void
+    public function addInFile(string $event, array|\Throwable $data, $asArray = false): void
     {
         if ($data instanceof \Throwable)
             $data = self::mapException($data);
 
-        $this->fileData[$event] = $data;
+        if ($asArray)
+            $this->fileData[$event][] = $data;
+        else
+            $this->fileData[$event] = $data;
     }
 
     public function writeInFileSystem(): void
     {
+        if(empty($this->fileData))
+            return;
+
         $dir = '../runtime/logs/'.$this->companySid;
         if (!is_dir($dir))
             mkdir($dir);
