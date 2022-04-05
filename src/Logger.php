@@ -30,11 +30,12 @@ class Logger
         $this->route = self::parseRoute($_SERVER['REQUEST_URI']);
     }
 
-    public function init(string $route, string $companySid, string $eventSid): void
+    public function init(string $route, string $companySid, string $eventSid = null): void
     {
         $this->route = self::parseRoute($route);
         $this->companySid = $companySid;
-        $this->eventSid = $eventSid;
+        if($eventSid)
+            $this->eventSid = $eventSid;
     }
 
     private function getCommutator(): Commutator
