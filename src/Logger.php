@@ -83,7 +83,7 @@ class Logger
             $this->fileData[$event] = $data;
     }
 
-    public function writeInFileSystem(): void
+    public function writeInFileSystem(string $format = 'json'): void
     {
         if(empty($this->fileData))
             return;
@@ -92,8 +92,8 @@ class Logger
         if (!is_dir($dir))
             mkdir($dir);
 
-        $logData = file_exists($dir.'/'.$this->eventSid.'.txt')
-            ? json_decode(file_get_contents($dir.'/'.$this->eventSid.'.txt'), true)
+        $logData = file_exists($dir.'/'.$this->eventSid.$format)
+            ? json_decode(file_get_contents($dir.'/'.$this->eventSid.$format), true)
             : [];
 
         $logData[$this->service][$this->route][] = $this->fileData;
