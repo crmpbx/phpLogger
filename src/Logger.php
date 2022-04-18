@@ -88,6 +88,7 @@ class Logger
         if(empty($this->fileData))
             return;
 
+        $format = '.'.$format
         $dir = '../runtime/logs/'.$this->companySid;
         if (!is_dir($dir))
             mkdir($dir);
@@ -98,7 +99,7 @@ class Logger
 
         $logData[$this->service][$this->route][] = $this->fileData;
 
-        file_put_contents($dir.'/'.$this->eventSid.'.txt', json_encode($logData));
+        file_put_contents($dir.'/'.$this->eventSid.$format, json_encode($logData));
     }
 
     private function mapException(\Throwable $e): array
