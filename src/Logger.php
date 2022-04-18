@@ -88,7 +88,7 @@ class Logger
         if(empty($this->fileData))
             return;
 
-        $format = '.'.$format
+        $format = '.'.$format;
         $dir = '../runtime/logs/'.$this->companySid;
         if (!is_dir($dir))
             mkdir($dir);
